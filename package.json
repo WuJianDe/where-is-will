@@ -1,0 +1,16 @@
+{
+  "name": "where-is-will",
+  "version": "1.0.0",
+  "description": "威力在哪裡 - 找出藏身各場景的神秘人物",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.101.1"
+  },
+  "devDependencies": {
+    "vite": "^5.4.21"
+  }
+}
