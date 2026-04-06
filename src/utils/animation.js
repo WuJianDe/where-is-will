@@ -1,48 +1,69 @@
-/**
- * 播放 5 層同心圓擴散動畫（命中威力時觸發）
- * @param {HTMLElement} container - position: relative 的容器
- * @param {number} x - 相對容器的 px X 座標
- * @param {number} y - 相對容器的 px Y 座標
- */
-export function playRipple(container, x, y) {
-  const CIRCLE_COUNT = 5
-  const circles = []
-
-  for (let i = 0; i < CIRCLE_COUNT; i++) {
-    const el = document.createElement('div')
-    el.className = 'ripple-circle'
-    el.style.left = `${x}px`
-    el.style.top = `${y}px`
-    el.style.animationDelay = `${i * 100}ms`
-    container.appendChild(el)
-    circles.push(el)
-  }
-
-  // 動畫結束後移除 DOM
-  setTimeout(() => circles.forEach(el => el.remove()), CIRCLE_COUNT * 100 + 900)
-}
+const SVG_NS = 'http://www.w3.org/2000/svg'
+const CIRCLE_R = 34
+const CIRCLE_SIZE = (CIRCLE_R + 16) * 2
+const CIRCUMFERENCE = 2 * Math.PI * CIRCLE_R
 
 /**
- * 在場景上放置永久的「已找到」圓圈標記
- * @param {HTMLElement} container
- * @param {number} x - px X 座標
- * @param {number} y - px Y 座標
- * @param {string} label
+ * 在目標位置畫一個毛筆感紅色圈圈
+ * - feTurbulence 製造筆觸不均勻感
+ * - stroke-dashoffset 動畫模擬筆畫過程
+ * - 隨機旋轉角度，每個圈都略有不同
  */
-export function placeFoundMarker(container, x, y, label = '✓') {
-  const el = document.createElement('div')
-  el.className = 'found-marker'
-  el.style.left = `${x}px`
-  el.style.top = `${y}px`
-  el.setAttribute('aria-label', `找到${label}`)
-  container.appendChild(el)
+export function placeFoundMarker(container, x, y) {
+  const filterId = `brush-${Date.now()}`
+  const rotation = -12 + Math.random() * 24 // 隨機 -12° ~ +12°
+
+  const svg = document.createElementNS(SVG_NS, 'svg')
+  svg.classList.add('drawn-circle')
+  svg.setAttribute('width', CIRCLE_SIZE)
+  svg.setAttribute('height', CIRCLE_SIZE)
+  svg.setAttribute('viewBox', `0 0 ${CIRCLE_SIZE} ${CIRCLE_SIZE}`)
+  svg.style.left = `${x}px`
+  svg.style.top = `${y}px`
+  svg.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`
+
+  // 毛筆紋理濾鏡
+  const defs = document.createElementNS(SVG_NS, 'defs')
+  const filter = document.createElementNS(SVG_NS, 'filter')
+  filter.setAttribute('id', filterId)
+  filter.setAttribute('x', '-20%')
+  filter.setAttribute('y', '-20%')
+  filter.setAttribute('width', '140%')
+  filter.setAttribute('height', '140%')
+
+  const turbulence = document.createElementNS(SVG_NS, 'feTurbulence')
+  turbulence.setAttribute('type', 'turbulence')
+  turbulence.setAttribute('baseFrequency', '0.035')
+  turbulence.setAttribute('numOctaves', '3')
+  turbulence.setAttribute('result', 'noise')
+
+  const displacement = document.createElementNS(SVG_NS, 'feDisplacementMap')
+  displacement.setAttribute('in', 'SourceGraphic')
+  displacement.setAttribute('in2', 'noise')
+  displacement.setAttribute('scale', '5')
+  displacement.setAttribute('xChannelSelector', 'R')
+  displacement.setAttribute('yChannelSelector', 'G')
+
+  filter.appendChild(turbulence)
+  filter.appendChild(displacement)
+  defs.appendChild(filter)
+  svg.appendChild(defs)
+
+  const circle = document.createElementNS(SVG_NS, 'circle')
+  circle.classList.add('drawn-circle__path')
+  circle.setAttribute('cx', CIRCLE_SIZE / 2)
+  circle.setAttribute('cy', CIRCLE_SIZE / 2)
+  circle.setAttribute('r', CIRCLE_R)
+  circle.setAttribute('filter', `url(#${filterId})`)
+  circle.style.strokeDasharray = CIRCUMFERENCE
+  circle.style.strokeDashoffset = CIRCUMFERENCE
+
+  svg.appendChild(circle)
+  container.appendChild(svg)
 }
 
 /**
  * 播放錯誤點擊動畫（紅色 ✗ 淡出）
- * @param {HTMLElement} container
- * @param {number} x
- * @param {number} y
  */
 export function playWrongClick(container, x, y) {
   const el = document.createElement('div')
@@ -55,8 +76,7 @@ export function playWrongClick(container, x, y) {
 }
 
 /**
- * 設定首頁浮動裝飾的隨機動畫延遲（製造錯落飄動感）
- * @param {NodeListOf<Element>} elements
+ * 設定首頁浮動裝飾的隨機動畫延遲
  */
 export function startFloating(elements) {
   elements.forEach((el, i) => {

@@ -17,7 +17,7 @@ export function mount(container) {
                 class="form-input"
                 id="admin-pw"
                 type="password"
-                placeholder="請輸入密碼"
+                placeholder="test1234"
                 required
                 autocomplete="current-password"
               />

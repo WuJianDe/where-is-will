@@ -1,6 +1,6 @@
 import { LEVELS, DEBUG_MODE } from '../config/levels.js'
 import { getImagePercent, checkHit, targetToImgPx } from '../utils/hitDetection.js'
-import { playRipple, placeFoundMarker, playWrongClick } from '../utils/animation.js'
+import { placeFoundMarker, playWrongClick } from '../utils/animation.js'
 import { startTimer, getElapsedMs, stopTimer, formatTime } from '../utils/timer.js'
 import { navigate } from '../lib/router.js'
 
@@ -76,12 +76,8 @@ export function mount(container, params) {
   const handleInteraction = (event) => {
     event.preventDefault()
 
-    if (DEBUG_MODE) {
-      const pos = getImagePercent(event, imgEl)
-      if (pos.inBounds) console.log(`[Debug] 點擊座標 → x: ${pos.x.toFixed(2)}, y: ${pos.y.toFixed(2)}`)
-    }
-
     const clickPos = getImagePercent(event, imgEl)
+    if (clickPos.inBounds) console.log(`[座標] x: ${clickPos.x.toFixed(2)}, y: ${clickPos.y.toFixed(2)}`)
     if (!clickPos.inBounds) return
 
     // 點擊的畫面座標（用於動畫）
@@ -99,12 +95,9 @@ export function mount(container, params) {
       foundIds.add(result.target.id)
       foundCountEl.textContent = foundIds.size
 
-      // 播放 5 個同心圓擴散動畫
-      playRipple(sceneEl, pxX, pxY)
-
-      // 在目標實際位置放置持久標記圈
+      // 在目標實際位置畫紅色圈圈（手繪動畫）
       const markerPos = targetToImgPx(result.target, imgEl)
-      placeFoundMarker(sceneEl, markerPos.x, markerPos.y, result.target.label)
+      placeFoundMarker(sceneEl, markerPos.x, markerPos.y)
 
       showHint(container, `🎉 找到了！${result.target.label}`, 'success')
 

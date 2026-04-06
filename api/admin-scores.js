@@ -3,7 +3,6 @@ const { createClient } = require('@supabase/supabase-js')
 /**
  * Vercel Serverless Function - 後台成績查詢
  * 使用 Service Role Key 繞過 RLS，查詢含 Email 的完整資料
- * 密碼驗證在伺服器端進行，不暴露於前端
  */
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -18,7 +17,18 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' })
   }
 
-  const { password } = req.body ?? {}
+  // vercel dev 有時不自動解析 body，手動處理
+  let body = req.body
+  if (!body || typeof body === 'string') {
+    try {
+      const raw = await readBody(req)
+      body = raw ? JSON.parse(raw) : {}
+    } catch {
+      body = {}
+    }
+  }
+
+  const { password } = body ?? {}
 
   if (!password || password !== process.env.ADMIN_PASSWORD) {
     return res.status(401).json({ error: '密碼錯誤' })
@@ -44,4 +54,13 @@ module.exports = async function handler(req, res) {
   }
 
   return res.status(200).json({ data })
+}
+
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    let data = ''
+    req.on('data', chunk => { data += chunk })
+    req.on('end', () => resolve(data))
+    req.on('error', reject)
+  })
 }

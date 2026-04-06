@@ -40,7 +40,12 @@ export async function getAdminScores(password) {
     body: JSON.stringify({ password }),
   })
 
-  const json = await res.json()
+  let json
+  try {
+    json = await res.json()
+  } catch {
+    throw new Error('API 無回應，請確認是否已部署到 Vercel（本機開發環境不支援後台功能）')
+  }
   if (!res.ok) throw new Error(json.error ?? '查詢失敗')
   return json.data ?? []
 }
