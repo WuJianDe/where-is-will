@@ -30,7 +30,7 @@ Vite 開發伺服器只處理前端。需要測試 PHP API 時，請將 `dist` �
 mysql/schema.sql
 ```
 
-此操作會建立 `scores` 資料表與排行榜索引。
+此操作會建立 `where_is_will_scores` 資料表與排行榜索引。
 
 ## Cloudways 部署
 
