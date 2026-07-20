@@ -1,17 +1,17 @@
 export async function submitScore({ name, email, timeMs }) {
-  await requestJson('/api/scores.php', {
+  await requestJson('api/scores.php', {
     method: 'POST',
     body: JSON.stringify({ name: name.trim(), email: email.trim().toLowerCase(), timeMs }),
   })
 }
 
 export async function getTopScores(limit = 10) {
-  const result = await requestJson(`/api/scores.php?limit=${encodeURIComponent(limit)}`)
+  const result = await requestJson(`api/scores.php?limit=${encodeURIComponent(limit)}`)
   return result.data ?? []
 }
 
 export async function getAdminScores(password) {
-  const result = await requestJson('/api/admin-scores.php', {
+  const result = await requestJson('api/admin-scores.php', {
     method: 'POST',
     body: JSON.stringify({ password }),
   })
