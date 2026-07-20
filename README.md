@@ -1,6 +1,14 @@
 # 找找小綠人
 
-三關找物遊戲：每關找到 5 個小綠人，以總時間進行排行榜排名。
+一款適合手機與桌機遊玩的三關找物遊戲。玩家需在熱鬧場景中找出小綠人；每關完成後累計總時間，並可選擇提交成績至排行榜。
+
+## 遊戲特色
+
+- 三個高解析手繪場景，每關有 5 個隱藏目標
+- 以點擊／觸控操作，並依圖片實際顯示範圍計算命中位置
+- 全程計時、完成成績提交與公開排行榜
+- 受密碼保護的管理頁面，可查閱含 Email 的完整成績
+- 場景圖片採用 WebP，減少首次載入流量約 89%
 
 ## 技術架構
 
@@ -11,7 +19,7 @@
 | 資料庫 | MySQL / MariaDB |
 | 路由 | Hash SPA (`#home`、`#game/1`、`#complete`) |
 
-前端的 API 皆使用同網域相對路徑：`/api/scores.php`、`/api/admin-scores.php`。
+前端 API 使用同網域相對路徑，因此可部署於網域根目錄或子目錄。例如部署於 `/where-is-will/` 時，API 會使用 `/where-is-will/api/scores.php`。
 
 ## 本機開發
 
@@ -35,7 +43,7 @@ mysql/schema.sql
 ## Cloudways 部署
 
 1. 在專案根目錄執行 `npm run build`。
-2. 將 `dist/` 中的所有內容上傳到 Cloudways Application 的 Web Root（通常是 `public_html/`）。
+2. 將 `dist/` **內的所有內容**上傳到網站目錄。例如子目錄部署可上傳至 `public_html/where-is-will/`；不要把 `dist` 再包成另一層目錄。
 3. 在伺服器 Web Root 的 `api/` 目錄建立 `config.local.php`，以 `api/config.local.example.php` 為範本。
 4. 將以下資料填入 `config.local.php`：資料庫名稱、使用者、密碼，以及另外設定一組強管理員密碼。
 5. 在目標資料庫執行 `mysql/schema.sql`。
