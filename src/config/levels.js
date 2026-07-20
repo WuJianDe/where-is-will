@@ -25,7 +25,7 @@ export const DEBUG_MODE = false;
 
 export const HOME_CONFIG = {
   // 首頁背景圖路徑（放在 public/images/）
-  backgroundImage: "/images/home-bg.png",
+  backgroundImage: "images/home-bg.png",
   title: "尋找小綠人",
   subtitle: "找出藏在人群中的小綠人",
 };
@@ -34,7 +34,7 @@ export const LEVELS = [
   {
     id: 1,
     name: "第一關：熱鬧的公園",
-    sceneImage: "/images/map1.png",
+    sceneImage: "images/map1.png",
     targets: [
       { id: "will-1-1", label: "小綠人", x: 29.7, y: 3.59, radius: 5 },
       { id: "will-1-2", label: "小綠人", x: 52.86, y: 31.52, radius: 5 },
@@ -46,7 +46,7 @@ export const LEVELS = [
   {
     id: 2,
     name: "第二關：繁忙的市場",
-    sceneImage: "/images/map2.png",
+    sceneImage: "images/map2.png",
     targets: [
       { id: "will-2-1", label: "小綠人", x: 8.37, y: 57.55, radius: 5 },
       { id: "will-2-2", label: "小綠人", x: 41.69, y: 50.96, radius: 5 },
@@ -58,7 +58,7 @@ export const LEVELS = [
   {
     id: 3,
     name: "第三關：沙灘派對",
-    sceneImage: "/images/map3.png",
+    sceneImage: "images/map3.png",
     targets: [
       { id: "will-3-1", label: "小綠人", x: 2.55, y: 55.46, radius: 5 },
       { id: "will-3-2", label: "小綠人", x: 61.13, y: 48.55, radius: 5 },
