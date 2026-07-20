@@ -1,145 +1,70 @@
-# 尋找小綠人 🟢
+# 找找小綠人
 
-一款「找找看」風格的網頁小遊戲——在熱鬧的場景中找出藏身人群的小綠人！
-
-## 功能介紹
-
-### 🏠 首頁
-- 背景圖片搭配 8 個浮動裝飾圖示（循環飄動動畫）
-- 「開始遊戲」進入第一關
-- 「排行榜」查看前 10 名
-
-### 🎮 遊戲關卡（共 3 關）
-- 每關場景圖中藏有 **5 個小綠人**，全部找到才能過關
-- 點選正確位置：出現**毛筆感紅色手繪圓圈**動畫，標記位置並永久保留
-- 點選錯誤位置：顯示紅色 ✗ 淡出提示
-- 畫面頂部即時顯示**計時器**與找到數量進度
-- 三關計時連續不中斷，完成所有關卡後跳轉通關畫面
-
-### 🎉 通關畫面
-- 顯示總完成時間（格式：`MM:SS.mm`）
-- 輸入名稱與 Email 提交成績至排行榜
-- 可跳過直接查看排行榜
-
-### 🏆 排行榜
-- 顯示前 10 名玩家名稱與完成時間
-- 金／銀／銅牌視覺標示
-
-### 🔐 後台管理
-- 密碼保護（於 Vercel 環境變數設定）
-- 顯示前 50 筆完整成績（名稱、Email、完成時間、提交時間）
-- 資料透過 Vercel Serverless Function 查詢，Email 不暴露於前端
-
----
+三關找物遊戲：每關找到 5 個小綠人，以總時間進行排行榜排名。
 
 ## 技術架構
 
-| 項目 | 技術 |
-|------|------|
-| 前端 | Vite + Vanilla JS |
-| 資料庫 | Supabase（PostgreSQL + RLS） |
-| 部署 | Vercel |
-| 路由 | Hash-based SPA（`#home` / `#game/1` / `#complete` 等） |
+| 範圍 | 技術 |
+| --- | --- |
+| 前端 | Vite + Vanilla JavaScript |
+| API | PHP 8 + PDO |
+| 資料庫 | MySQL / MariaDB |
+| 路由 | Hash SPA (`#home`、`#game/1`、`#complete`) |
 
----
+前端的 API 皆使用同網域相對路徑：`/api/scores.php`、`/api/admin-scores.php`。
 
 ## 本機開發
 
-### 1. 安裝依賴
-
 ```bash
 npm install
-```
-
-### 2. 設定環境變數
-
-複製 `.env.example` 為 `.env.local` 並填入：
-
-```env
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
-
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-ADMIN_PASSWORD=your-admin-password
-```
-
-### 3. 建立資料庫
-
-在 Supabase SQL Editor 執行 `supabase/schema.sql`。
-
-### 4. 啟動開發伺服器
-
-```bash
 npm run dev
 ```
 
-開啟 [http://localhost:5173](http://localhost:5173)，`/api/` 路由由 Vite middleware 在本機處理，無需額外啟動 API server。
+Vite 開發伺服器只處理前端。需要測試 PHP API 時，請將 `dist` 部署到具備 PHP 與 MySQL 的 Web Server，或自行以 Apache / Nginx + PHP-FPM 提供網站。
 
----
+## MySQL 初始化
 
-## 自訂關卡
+在 Cloudways 的資料庫管理工具（例如 phpMyAdmin）選取目標資料庫後，執行：
 
-編輯 `src/config/levels.js`：
-
-```js
-export const LEVELS = [
-  {
-    id: 1,
-    name: '第一關：場景名稱',
-    sceneImage: '/images/map1.png', // 圖片放在 public/images/
-    targets: [
-      { id: 'g1-1', label: '小綠人', x: 42.5, y: 38.2, radius: 5 },
-      // x, y 為圖片的百分比座標（0~100）
-      // radius 為命中容許半徑（百分比，建議 4~6）
-    ],
-  },
-  // ...
-]
+```sql
+mysql/schema.sql
 ```
 
-### 如何找到座標
+此操作會建立 `scores` 資料表與排行榜索引。
 
-1. `npm run dev` 啟動後進入遊戲關卡
-2. 點擊場景圖上的小綠人位置
-3. 瀏覽器 Console 會印出：`[座標] x: 42.53, y: 38.21`
-4. 將數值填入 `levels.js` 對應關卡的 `targets`
+## Cloudways 部署
 
----
+1. 在專案根目錄執行 `npm run build`。
+2. 將 `dist/` 中的所有內容上傳到 Cloudways Application 的 Web Root（通常是 `public_html/`）。
+3. 在伺服器 Web Root 的 `api/` 目錄建立 `config.local.php`，以 `api/config.local.example.php` 為範本。
+4. 將以下資料填入 `config.local.php`：資料庫名稱、使用者、密碼，以及另外設定一組強管理員密碼。
+5. 在目標資料庫執行 `mysql/schema.sql`。
+6. 確認 PHP 已啟用 `pdo_mysql` 擴充套件，然後開啟網站測試送出成績與排行榜。
 
-## 部署到 Vercel
+`config.local.php` 不會被 Git 追蹤。請勿把資料庫密碼、管理員密碼寫入 JavaScript、提交到 Git，或放在可公開下載的文字檔中。
 
-1. 將專案推送到 GitHub
-2. 在 Vercel 匯入 repo
-3. 於 Vercel **Settings → Environment Variables** 新增以下 5 個變數：
+### 資料庫主機
 
-| 變數名稱 | 說明 |
-|----------|------|
-| `VITE_SUPABASE_URL` | Supabase Project URL |
-| `VITE_SUPABASE_ANON_KEY` | Supabase anon public key |
-| `SUPABASE_URL` | Supabase Project URL（後台 API 用） |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key（僅伺服器端） |
-| `ADMIN_PASSWORD` | 後台管理密碼 |
+程式預設使用 `127.0.0.1:3306`。若 Cloudways Access Details 顯示不同的 MySQL Host 或 Port，請在 `config.local.php` 覆寫 `DB_HOST` 或 `DB_PORT`。
 
-4. 儲存後點選 **Redeploy** 使環境變數生效
+## API
 
----
+| Endpoint | Method | 功能 |
+| --- | --- | --- |
+| `/api/scores.php` | `GET` | 讀取前 1–50 名公開排行榜，不含 Email |
+| `/api/scores.php` | `POST` | 新增名稱、Email、完成時間 |
+| `/api/admin-scores.php` | `POST` | 使用管理員密碼讀取前 50 筆完整成績 |
+
+API 使用 PDO 預備敘述、伺服器端輸入驗證與泛用錯誤訊息，避免將資料庫細節或機密資訊回傳給瀏覽器。
 
 ## 專案結構
 
 ```
-where-is-will/
-├── api/
-│   └── admin-scores.js      # Vercel Serverless Function（後台查詢）
-├── public/images/           # 場景圖片
-├── src/
-│   ├── config/levels.js     # 關卡設定（座標、圖片路徑）
-│   ├── lib/                 # router、supabase client
-│   ├── modules/             # 各畫面模組
-│   ├── services/            # Supabase 資料存取
-│   ├── utils/               # 點擊偵測、計時器、動畫
-│   └── styles/main.css
-├── supabase/schema.sql      # 資料庫建置 SQL
-├── .env.example
-└── vercel.json
+public/
+  api/                    # 隨 Vite build 複製到 dist/api 的 PHP API
+src/
+  config/levels.js        # 關卡與目標座標
+  modules/                # 頁面模組
+  services/scoreService.js
+mysql/schema.sql          # MySQL 建表 SQL
 ```
